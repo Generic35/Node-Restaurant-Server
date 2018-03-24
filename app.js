@@ -3,6 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -10,12 +12,9 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
-var app = express();
-
-const mongoose = require('mongoose');
-mongoose.Promise = require('bluebird');
-
 const Dishes = require('./models/dishes');
+
+var app = express();
 
 // Connection URL
 const url = 'mongodb://localhost:27017/conFusion';
