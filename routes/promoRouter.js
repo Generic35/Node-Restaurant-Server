@@ -39,43 +39,59 @@ promotionRouter.route('/')
   }, (err) => next(err))
   .catch((err) => next(err));    
 });
+
+promotionRouter.route('/:promotionId')
+.get((req,res,next) => {
+  Promotions.findById(req.params.promotionId)
+  .then((promotion) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(promotion);
+  }, (err) => next(err))
+  .catch((err) => next(err));
+})
+.post((req, res, next) => {
+  res.statusCode = 403;
+  res.end('POST operation not supported on /promotions/'+ req.params.promotionId);
+})
+.put((req, res, next) => {
+  Promotions.findByIdAndUpdate(req.params.promotionId, {
+      $set: req.body
+  }, { new: true })
+  .then((promotion) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(promotion);
+  }, (err) => next(err))
+  .catch((err) => next(err));
+})
+.delete((req, res, next) => {
+  Promotions.findByIdAndRemove(req.params.promotionId)
+  .then((resp) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(resp);
+  }, (err) => next(err))
+  .catch((err) => next(err));
+});
+
   // .all((req, res, next) => {
   //   res.statusCode = 200;
   //   res.setHeader('Content-Type', 'text/plain');
   //   next();
   // })
   // .get((req, res, next) => {
-  //   res.end('Will send all the promotiones to you!');
+  //   res.end(`Will send promotion ${req.params.promotionId} to you!`);
   // })
   // .post((req, res, next) => {
-  //   res.end('Will add the promotion: ' + req.body.name + ' with details: ' + req.body.description);
+  //   res.statusCode = 403;
+  //   res.end('Post operation not supported for this route');
   // })
   // .put((req, res, next) => {
-  //   res.statusCode = 403;
-  //   res.end('PUT operation not supported on /promotiones');
+  //   res.end('Will update the promotion: ' + req.body.name + ' with details: ' + req.body.description);
   // })
   // .delete((req, res, next) => {
-  //   res.end('Deleting all promotiones');
+  //   res.end(`Deleting promotion ${req.params.promotionId}`);
   // });
-
-promotionRouter.route('/:promotionId')
-  .all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    next();
-  })
-  .get((req, res, next) => {
-    res.end(`Will send promotion ${req.params.promotionId} to you!`);
-  })
-  .post((req, res, next) => {
-    res.statusCode = 403;
-    res.end('Post operation not supported for this route');
-  })
-  .put((req, res, next) => {
-    res.end('Will update the promotion: ' + req.body.name + ' with details: ' + req.body.description);
-  })
-  .delete((req, res, next) => {
-    res.end(`Deleting promotion ${req.params.promotionId}`);
-  });
 
 module.exports = promotionRouter;
