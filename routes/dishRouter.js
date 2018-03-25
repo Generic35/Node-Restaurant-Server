@@ -9,7 +9,6 @@ const dishRouter = express.Router();
 dishRouter.use(bodyParser.json());
 
 dishRouter.route('/')
-dishRouter.route('/')
 .get((req,res,next) => {
     Dishes.find({})
     .populate('comments.author')
