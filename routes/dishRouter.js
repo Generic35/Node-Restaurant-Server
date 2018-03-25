@@ -177,8 +177,12 @@ dishRouter.route('/:dishId/comments/:commentId')
 })
 .put(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishId)
+    .populate('comments.author')  
     .then((dish) => {
-        if (dish != null && dish.comments.id(req.params.commentId) != null) {
+        let comment = dish.comments.id(req.params.commentId);
+
+        if (dish != null && dish.comments.id(req.params.commentId &&
+            req.user.id === dish.comments.id(req.params.commentId).author.id) != null) {
             if (req.body.rating) {
                 dish.comments.id(req.params.commentId).rating = req.body.rating;
             }
@@ -191,6 +195,11 @@ dishRouter.route('/:dishId/comments/:commentId')
                 res.setHeader('Content-Type', 'application/json');
                 res.json(dish);                
             }, (err) => next(err));
+        }
+        else if (req.user.id !== dish.comments.id(req.params.commentId).author.id) {
+          err = new Error('Unauthorized');
+          err.status = 403;
+          return next(err);
         }
         else if (dish == null) {
             err = new Error('Dish ' + req.params.dishId + ' not found');
