@@ -19,14 +19,15 @@ favoritesRouter.route('/')
       .catch((err) => next(err));
   })
   .post(authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({ user: req.body.user.id }, (err, favorites) => {
+    Favorites.findOne({ author: req.user.id }, (err, favorites) => {
       if (err) {
         return next(err)
       }
       else if (favorites) {
-        for (let dishId in req.body.favoriteDishIds) {
+        req.body.favoriteDishIds.forEach(dishId => {
           favorites.dishes.push(dishId);
-        }
+        });
+
         favorites.save().then((favorites) => {
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json');
@@ -34,9 +35,12 @@ favoritesRouter.route('/')
         }, (err) => next(err))
       }
       else {
-        Favorites.create(req.body)
+        Favorites.create({
+          author: req.user.id,
+          dishes: req.body.favoriteDishIds
+        })
           .then((favorites) => {
-            console.log('favorite Created ', favorites);
+            console.log('favorites Created ', favorites);
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
             res.json(favorites);
@@ -49,8 +53,8 @@ favoritesRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /favorites');
   })
-  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    Favorites.findOneAndRemove({ user: req.body.user.id })
+  .delete(authenticate.verifyUser, (req, res, next) => {
+    Favorites.findOneAndRemove({ author: req.user.id })
       .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -99,14 +103,14 @@ favoritesRouter.route('/:dishId')
     res.end('PUT operation not supported on /favorites');
   })
   .delete(authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({ user: req.body.user.id }, (err, favorites) => {
-      if (err) {
-        return next(err);
-      }
-      else if (favorites) {
-        let favoriteDishToRemove = favorites.dishes.find((dish)=>{
-          return dish.id === req.params.dishId
-        });
+    Favorites.findOne({ author: req.user.id })
+      .populate('dishes')
+      .then((favorites) => {
+        if (favorites) {
+          let favoriteDishToRemove = favorites.dishes.find((dish)=>{
+            return dish.id === req.params.dishId
+          });
+          
         let index = favorites.dishes.indexOf(favoriteDishToRemove);
         favorites.dishes.splice(index, 1)
         favorites.save().then((favorites) => {
