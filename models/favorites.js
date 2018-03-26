@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 var favoritesSchema = new Schema({
-  dishes:  {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: 'Dish'
-  },
   author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-  }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  dishes:  [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Dish'
+  }]
 }, {
   timestamps: true
 });

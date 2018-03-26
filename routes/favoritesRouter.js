@@ -9,7 +9,8 @@ favoritesRouter.use(bodyParser.json());
 favoritesRouter.route('/')
   .get((req, res, next) => {
     Favorites.find({})
-      .populate('user').populate('dishes')
+      .populate('author')
+      .populate('dishes')
       .then((favorites) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
